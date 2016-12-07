@@ -1,6 +1,6 @@
 Test Repository for Agri Data (TReAD)
-v0.0.2_init-database-form
-Abraham Darius S. Llave | 2016-Dec-07 2304
+v0.0.3_revised-database-form-1
+Abraham Darius S. Llave | 2016-Dec-08 0229
 
 Mini-documentation of RESTful API for access to database
 =========================================================
@@ -12,6 +12,147 @@ types in the database are identified and now defined accordingly.
 
 ==========================================================
  
+* country
+Country/territory, as per ISO-3166-2.
+
+	country_id : character_varying(2)
+	country_shorthand : character_varying(50)
+	country_formal : character_varying(255)
+	descr: text
+
+	Tests:
+		target uniqueness of each field. i.e., try adding india or indonesia twice s - should not be allowed.
+		delete an entry when it is being referenced from other tables - should not be allowed.
+	
+	Dependencies:
+		Should create corresponding 'unspecified' placeholder in district and village tables, begining with 999 for district_id and village_id
+	
+	GET /
+	- lists all
+	GET /<two-alpha-numeric-char-case-agnostic>
+	 - returns information about the country, with
+	 <two-alpha-numeric-char-case-agnostic> being the internal representation of the variety
+	<creation/modification/deletion not priority, basing on already fixed ISO-3166-2>	
+
+
+* crop
+(Common) Plant name, like 'rice'.
+
+	crop_id : character varying(50)
+	friendly_name: character varying(50)
+	genus : character varying(50)
+	species :  character varying(50)	
+	descr: text
+	
+	Tests:
+		target uniqueness of each field. i.e., 
+			try adding rice or cassave twice - should not be allowed.
+			try adding twice oryza-sativa as genus-species - should not be allowed.
+		delete an entry when it is being referenced from other tables - should not be allowed.	
+	 
+	GET /
+	 - lists all
+	GET /<alpha-numeric-no-space>
+	 - returns information about the crop (i.e. common name(s), scientifc name), with
+	 <alpha-numeric-no-space> being the internal representation
+	GET /search/<alpha-numeric-including-space>
+	 - As with others.
+	 - Returns matching as if performing `GET /<..>` on each entry
+	POST /
+	 - creates 
+	 - REQUIRED. friendly_name.
+	 - OPTIONAL. desc.
+	PUT /<single-alpha-char>
+	 - updates
+	 - REQUIRED. friendly_name
+	DELETE /<single-alpha-char>
+	 - deletes 
+			200 if no dependency/in use
+			409 if dependency. will require use of UI/dialog box to delete. To be implemented later.
+
+
+* district
+District as attached to a village. Ought to have a default XX per country.
+
+	district_id : character varying(50) '' alpha-numeric-with-underscore-ignore-case	
+	county_id_fk : character_varying(2)
+	friendly_name: character varying(255)
+
+	Tests:
+		target uniqueness of each field. i.e., 
+			try adding district_str entries for the same country twice - should not be allowed.
+			try adding entries where country is not in country table - should not be allowed.
+			try adding two entries in each country, same district friendly_name but different district_str - should be allowed.
+	
+	GET /
+	- lists all
+	GET /<alpha-numeric-no-space-ignore-case>
+	- returns information about a single entry
+	POST /
+	 - creates.
+	 - needs friendly_name.
+	 - REQUIRED. internal representation of `village`, aside from name.
+	DELETE /<single-alpha-char>
+	 - delete entry.
+			200 if no dependency/in use
+			409 if dependency. will require use of UI/dialog box to delete. To be implemented later.	
+
+	
+* fn
+Perhaps first names, this referring to a person?
+
+	fn_id :  character varying(50) '' alpha-numeric-with-underscore-ignore-case
+	country_id_fk : character varying(2)
+	friendly_name: character varying(255)
+
+	Tests:
+		target uniqueness of each field. i.e., 
+			try adding fn_str entries for the same country twice - should not be allowed.
+			try adding entries where country is not in country table - should not be allowed.
+			try adding two entries in each country, same friendly_name but different fn_str - should be allowed.	
+	
+  GET /
+	 - lists all, first every 1000 entries.
+	GET /<internal_representation>
+	 - RETURNS. informations about a single entry.
+	POST /
+	 - creates.
+	 - needs friendly_name.
+	 - REQUIRED. internal representation of `country`, aside from friendly_name.
+	 - RETURNS. 200 with URL /<internal_representation>.
+	PUT /<internal_representation>
+	 - updates fno
+	 - REQUIRED. <internal_representation> and at least one of friendly_name,country_id_fk
+	DELETE /<internal_representation>
+	 - delete entry.
+			200 if no dependency/in use
+			409 if dependency. will require use of UI/dialog box to delete. To be implemented later.
+
+* fno
+Unidentified entity. Inquiry to resolve this issue effectively turned down. So far, what we know is that this should be just one uppercase character.
+
+	fno_id : character,
+	fno_friendly : character varying(50)
+	descr: text
+
+	Tests:
+		target uniqueness of each field. i.e., 
+			try adding fno_friendly with the same data - should not be allowed.
+			
+	GET /
+	 - lists all
+	POST /
+	 - creates
+	 - REQUIRED. Entry for fno_friendly.
+	 - OPTIONAL. desc.	 
+	PUT /<single-alpha-char>
+	 - updates fno
+	DELETE /<single-alpha-char>
+	 - delete entry.
+			200 if no dependency/in use
+			409 if dependency. will require use of UI/dialog box to delete. To be implemented later. 
+
+
 * record
 The whole row, in a (raw) spreadsheet.
 
@@ -20,12 +161,13 @@ The whole row, in a (raw) spreadsheet.
 	year : integer ''implement PL/SQL check >= 1900 <= 9999
 	season_id_fk : character varying(20) 
 	fno_id_fk : character
-	village_id_fk : character varying(2)   '' this and district_id_fk migt be breaking normalization rules
-	district_id_fk : character varying(50)
-	latitude :
-	longitude : 
+  district_id_fk : integer
+	village_id_fk : integer
+	latitude : numeric (10,6)
+	longitude : numeric (10,6)
+	fn : character_varying(50)
 	fa : numeric(10,2)
-	ces : seedmethod_id_fk
+	ces :  character_varying(20)
 	seed_rate : integer
 	cen_date : ?date
 	ha_date : ?date
@@ -48,28 +190,19 @@ The whole row, in a (raw) spreadsheet.
 			200 on success.
 			NO ISSUES ON DEPENDENCY FROM OTHER TABLES AS OF THIS TIME.
 
-* country
-Country/territory, as per ISO-3166-2.
-
-	country_id : character_varying(2)
-	country_shorthand : character_varying(50)
-	country_formal : character_varying(255)
-	desc: text
-
-	GET /
-	- lists all
-	GET /<two-alpha-numeric-char-case-agnostic>
-	 - returns information about the country, with
-	 <two-alpha-numeric-char-case-agnostic> being the internal representation of the variety
-	<creation/modification/deletion not priority, basing on already fixed ISO-3166-2>	
 
 * season
 Planting seasons. Default/limited so far to the usual suspects - dry and wet.
 
   season_id : character varying(20) ''alpha-numeric-with-underscore-ignore-case	
 	friendly_name: character varying(255)
-	desc: text
+	descr: text
 
+	Tests:
+		target uniqueness of each field. i.e., 
+			try adding to season_id twice with the same data - should not be allowed.	
+			try adding to friendly_name twice with the same data - should not be allowed.	
+	
 	GET /<alpha-numeric-no-space-ignore-case>
 	 - returns information about the season, with
 	 <alpha-numeric-no-space> being the internal representation of the variety	 
@@ -88,100 +221,19 @@ Planting seasons. Default/limited so far to the usual suspects - dry and wet.
 			200 if no dependency/in use
 			409 if dependency. will require use of UI/dialog box to delete. To be implemented later. 
 
- 
-* fno
-Unidentified entity. Inquiry to resolve this issue effectively turned down. So far, what we 
-know is that this should be just one uppercase character.
-
-	fno_id : character,
-	fno_friendly : character varying(50)
-	desc: text
-
-	GET /
-	 - lists all
-	POST /
-	 - creates
-	 - REQUIRED. Entry for fno_friendly.
-	 - OPTIONAL. desc.	 
-	PUT /<single-alpha-char>
-	 - updates fno
-	DELETE /<single-alpha-char>
-	 - delete entry.
-			200 if no dependency/in use
-			409 if dependency. will require use of UI/dialog box to delete. To be implemented later. 
-
-* village
-Village as attached to a country.
-
-  village_id : alpha-numeric-with-underscore-ignore-case
-	country_id_fk : character varying(2)
-	friendly_name: character varying(255)
-
-	GET /
-	- lists all
-	GET /<alpha-numeric-no-space-ignore-case>
-	- returns information about a single entry
-	POST /
-	 - creates.
-	 - needs friendly_name.
-	 - REQUIRED. internal representation of `country`, aside from name.
-	DELETE /<single-alpha-char>
-	 - delete entry.
-			200 if no dependency/in use
-			409 if dependency. will require use of UI/dialog box to delete. To be implemented later.
-	 
-* district
-District as attached to a village.
-
-	district_id : character varying(50) '' alpha-numeric-with-underscore-ignore-case
-	village_id_fk : character varying(2)
-	friendly_name: character varying(255)
-
-	GET /
-	- lists all
-	GET /<alpha-numeric-no-space-ignore-case>
-	- returns information about a single entry
-	POST /
-	 - creates.
-	 - needs friendly_name.
-	 - REQUIRED. internal representation of `village`, aside from name.
-	DELETE /<single-alpha-char>
-	 - delete entry.
-			200 if no dependency/in use
-			409 if dependency. will require use of UI/dialog box to delete. To be implemented later.	
-	
-* fn
-Perhaps first names?
-
-	fn_id :  character varying(50) '' alpha-numeric-with-underscore-ignore-case
-	country_id_fk : character varying(2)
-	friendly_name: character varying(255)
-
-  GET /
-	 - lists all, first every 1000 entries.
-	GET /<internal_representation>
-	 - RETURNS. informations about a single entry.
-	POST /
-	 - creates.
-	 - needs friendly_name.
-	 - REQUIRED. internal representation of `country`, aside from friendly_name.
-	 - RETURNS. 200 with URL /<internal_representation>.
-	PUT /<internal_representation>
-	 - updates fno
-	 - REQUIRED. <internal_representation> and at least one of friendly_name,country_id_fk
-	DELETE /<internal_representation>
-	 - delete entry.
-			200 if no dependency/in use
-			409 if dependency. will require use of UI/dialog box to delete. To be implemented later.
-	 
-
+			
 * seedmethod
 Planting method. Default/limited to usual suspects: Transplanted and direct-seeded.
 
 	seedmethod_id : character varying(20)
 	friendly_name : character varying(50)
-	desc: text
+	descr: text
 
+	Tests:
+		target uniqueness of each field. i.e., 
+			try adding to seedmethod_id twice with the same data - should not be allowed.	
+			try adding to friendly_name twice with the same data - should not be allowed.		
+	
 	GET /
 	 - lists all
 	GET /<alpha-numeric-no-space>
@@ -201,71 +253,19 @@ Planting method. Default/limited to usual suspects: Transplanted and direct-seed
 			200 if no dependency/in use
 			409 if dependency. will require use of UI/dialog box to delete. To be implemented later.	
 
-* variety	
-Variety name.
-Assumption: We still don't consider the scenario where different names refer to a rice-crop. i.e., like IR-64 for 'PSC Rc-64'
-
-	variety_id : character varying(50)
-	crop_id_fk : character varying(50)
-	friendly_name : character varying(50)
-	desc: text
-	
-	GET /
-	 - lists all
-	GET /<alpha-numeric-no-space>
-	 - returns information about the variety including crop type
-	GET /search/<alpha-numeric-including-space>
-	 - As with others.
-	 - Returns matching as if performing `GET /<..>` on each entry
-	POST /
-	 - creates
-	 - REQUIRED. friendly_name and crop_id
-	 - OPTIONAL. desc.
-	PUT /<single-alpha-char>
-	 - updates
-	 - REQUIRED. friendly_name
-	DELETE /<single-alpha-char>
-	 - deletes 
-			200 if no dependency/in use
-			409 if dependency. will require use of UI/dialog box to delete. To be implemented later.	
-	
-* crop
-(Common) Plant name, like 'rice'.
-
-	crop_id : character varying(50)
-	friendly_name: character varying(50)
-	genus : character varying(50)
-	species :  character varying(50)	
-	desc: text
-	 
-	GET /
-	 - lists all
-	GET /<alpha-numeric-no-space>
-	 - returns information about the crop (i.e. common name(s), scientifc name), with
-	 <alpha-numeric-no-space> being the internal representation
-	GET /search/<alpha-numeric-including-space>
-	 - As with others.
-	 - Returns matching as if performing `GET /<..>` on each entry
-	POST /
-	 - creates 
-	 - REQUIRED. friendly_name.
-	 - OPTIONAL. desc.
-	PUT /<single-alpha-char>
-	 - updates
-	 - REQUIRED. friendly_name
-	DELETE /<single-alpha-char>
-	 - deletes 
-			200 if no dependency/in use
-			409 if dependency. will require use of UI/dialog box to delete. To be implemented later.
-	
 
 * soilprop
 Apparently, preparations in consideration to the stress conditions.
 
   soilprop_id: character_varying(4)
 	friendly_name: character varying(20)
-	desc: text
+	descr: text
 
+	Tests:
+		target uniqueness of each field. i.e., 
+			try adding to soilprop_id twice with the same data - should not be allowed.	
+			try adding to friendly_name twice with the same data - should not be allowed.		
+	
 	GET /
 	 - lists all, first every 1000 entries.
 	GET /<4-digit-char>
@@ -286,3 +286,65 @@ Apparently, preparations in consideration to the stress conditions.
 			200 if no dependency/in use
 			409 if dependency. will require use of UI/dialog box to delete. To be implemented later.
 
+			
+* variety	
+Lists variety names  of a plant.
+Assumption: We still don't consider the scenario where different names refer to a rice-crop. i.e., like IR-64 for 'PSC Rc-64'
+
+	variety_id : character varying(50)
+	crop_id_fk : character varying(50)
+	friendly_name : character varying(100)
+	descr: text
+	
+	target uniqueness of each field. i.e., 
+			try adding to variety_id twice with the same data - should not be allowed.	
+			try adding to friendly_name twice with the same data - should not be allowed.	
+	target foreign keys
+			try adding entries whose crop_id is not preesent in crop table - should not be allowed.
+	
+	GET /
+	 - lists all
+	GET /<alpha-numeric-no-space>
+	 - returns information about the variety including crop type
+	GET /search/<alpha-numeric-including-space>
+	 - As with others.
+	 - Returns matching as if performing `GET /<..>` on each entry
+	POST /
+	 - creates
+	 - REQUIRED. friendly_name and crop_id
+	 - OPTIONAL. desc.
+	PUT /<single-alpha-char>
+	 - updates
+	 - REQUIRED. friendly_name
+	DELETE /<single-alpha-char>
+	 - deletes 
+			200 if no dependency/in use
+			409 if dependency. will require use of UI/dialog box to delete. To be implemented later.	
+	
+			
+* village
+Village as attached to a country.
+	
+	village_id : integer 
+	village_str : character varying(50)
+	country_id_fk : character varying(2)
+	friendly_name: character varying(255)
+
+	Tests:
+		target uniqueness of each field. i.e., 
+				try adding to village_str twice with the same data - should not be allowed.					
+		target foreign keys
+				try adding entries whose country_id is not preesent in country table - should not be allowed.	
+	
+	GET /
+	- lists all
+	GET /<alpha-numeric-no-space-ignore-case>
+	- returns information about a single entry
+	POST /
+	 - creates.
+	 - needs friendly_name.
+	 - REQUIRED. internal representation of `country`, aside from name.
+	DELETE /<single-alpha-char>
+	 - delete entry.
+			200 if no dependency/in use
+			409 if dependency. will require use of UI/dialog box to delete. To be implemented later.
