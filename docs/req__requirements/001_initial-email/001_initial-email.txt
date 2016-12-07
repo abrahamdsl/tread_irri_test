@@ -1,0 +1,29 @@
+Dear Abraham,
+
+As part of the recruitment process for Specialist-Web Development, I'd like to give you the instructions for the practical exam.
+
+Task: Using all available IT technologies at your disposal, design and publish an online browser-based data entry/retrieval system
+
+Essential component
+1. Data entry module - use the field names in the attached file as entry labels
+2. Data retrieval module 
+3. Data visualization module
+4. Database module - design the schema based on variables in the attached file. The database must contain values that are uniform, in standard data input format (dates, location coordinates, correct spelling etc.) and if possible should not contain no empty cells)
+
+Optional component
+1. User access module
+2. Data editing module
+3. Data query module
+4. Data validation module
+
+Deliverables
+1. An online browser-based data entry/retrieval system
+2. Swimlane or process flow diagram of the system
+
+
+Final note: 
+Be very creative
+User interface must be user-friendly and intuitive.
+Use the content of the attached file as sample entries in the database
+
+Deadline: 8 December 2016, Thursday, 1PM/
