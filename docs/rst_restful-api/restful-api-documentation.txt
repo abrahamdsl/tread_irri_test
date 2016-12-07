@@ -1,0 +1,288 @@
+Test Repository for Agri Data (TReAD)
+v0.0.2_init-database-form
+Abraham Darius S. Llave | 2016-Dec-07 2304
+
+Mini-documentation of RESTful API for access to database
+=========================================================
+
+This document outlines the nouns we have identified from the given
+specifications, and the operations we deem to be important for the
+relevant manipulations. Also, the corresponding columns and data
+types in the database are identified and now defined accordingly.
+
+==========================================================
+ 
+* record
+The whole row, in a (raw) spreadsheet.
+
+	record_id : integer
+	country_id_fk : character(2)
+	year : integer ''implement PL/SQL check >= 1900 <= 9999
+	season_id_fk : character varying(20) 
+	fno_id_fk : character
+	village_id_fk : character varying(2)   '' this and district_id_fk migt be breaking normalization rules
+	district_id_fk : character varying(50)
+	latitude :
+	longitude : 
+	fa : numeric(10,2)
+	ces : seedmethod_id_fk
+	seed_rate : integer
+	cen_date : ?date
+	ha_date : ?date
+	var_name : variety_id_fk
+	pre_crop : crop_id_fk
+	fallow_period : integer ''implement PL/SQL check >= 0
+	soil_prop_fk: character_varying(4)
+	yield: numeric(10,4)
+	
+
+	GET /
+	- lists all
+	GET /<integer>
+	- returns information about a single entry
+	POST /
+	 - creates.
+	 - REQUIRED. <expound later>
+	DELETE /<single-alpha-char>
+	 - delete entry.
+			200 on success.
+			NO ISSUES ON DEPENDENCY FROM OTHER TABLES AS OF THIS TIME.
+
+* country
+Country/territory, as per ISO-3166-2.
+
+	country_id : character_varying(2)
+	country_shorthand : character_varying(50)
+	country_formal : character_varying(255)
+	desc: text
+
+	GET /
+	- lists all
+	GET /<two-alpha-numeric-char-case-agnostic>
+	 - returns information about the country, with
+	 <two-alpha-numeric-char-case-agnostic> being the internal representation of the variety
+	<creation/modification/deletion not priority, basing on already fixed ISO-3166-2>	
+
+* season
+Planting seasons. Default/limited so far to the usual suspects - dry and wet.
+
+  season_id : character varying(20) ''alpha-numeric-with-underscore-ignore-case	
+	friendly_name: character varying(255)
+	desc: text
+
+	GET /<alpha-numeric-no-space-ignore-case>
+	 - returns information about the season, with
+	 <alpha-numeric-no-space> being the internal representation of the variety	 
+	GET /search/<alpha-numeric-including-space-ignore-case>
+	 - searches and returns seasons matching the specified param. All info , such as country of origin and climate conditions including internal representation will be returned.
+	GET /
+	 - lists all
+	POST /
+	 - creates
+	 - REQUIRED. Entry for fno_friendly.
+	 - OPTIONAL. desc.	 
+	PUT /<single-alpha-char>
+	 - updates fno
+	DELETE /<single-alpha-char>
+	 - delete entry.
+			200 if no dependency/in use
+			409 if dependency. will require use of UI/dialog box to delete. To be implemented later. 
+
+ 
+* fno
+Unidentified entity. Inquiry to resolve this issue effectively turned down. So far, what we 
+know is that this should be just one uppercase character.
+
+	fno_id : character,
+	fno_friendly : character varying(50)
+	desc: text
+
+	GET /
+	 - lists all
+	POST /
+	 - creates
+	 - REQUIRED. Entry for fno_friendly.
+	 - OPTIONAL. desc.	 
+	PUT /<single-alpha-char>
+	 - updates fno
+	DELETE /<single-alpha-char>
+	 - delete entry.
+			200 if no dependency/in use
+			409 if dependency. will require use of UI/dialog box to delete. To be implemented later. 
+
+* village
+Village as attached to a country.
+
+  village_id : alpha-numeric-with-underscore-ignore-case
+	country_id_fk : character varying(2)
+	friendly_name: character varying(255)
+
+	GET /
+	- lists all
+	GET /<alpha-numeric-no-space-ignore-case>
+	- returns information about a single entry
+	POST /
+	 - creates.
+	 - needs friendly_name.
+	 - REQUIRED. internal representation of `country`, aside from name.
+	DELETE /<single-alpha-char>
+	 - delete entry.
+			200 if no dependency/in use
+			409 if dependency. will require use of UI/dialog box to delete. To be implemented later.
+	 
+* district
+District as attached to a village.
+
+	district_id : character varying(50) '' alpha-numeric-with-underscore-ignore-case
+	village_id_fk : character varying(2)
+	friendly_name: character varying(255)
+
+	GET /
+	- lists all
+	GET /<alpha-numeric-no-space-ignore-case>
+	- returns information about a single entry
+	POST /
+	 - creates.
+	 - needs friendly_name.
+	 - REQUIRED. internal representation of `village`, aside from name.
+	DELETE /<single-alpha-char>
+	 - delete entry.
+			200 if no dependency/in use
+			409 if dependency. will require use of UI/dialog box to delete. To be implemented later.	
+	
+* fn
+Perhaps first names?
+
+	fn_id :  character varying(50) '' alpha-numeric-with-underscore-ignore-case
+	country_id_fk : character varying(2)
+	friendly_name: character varying(255)
+
+  GET /
+	 - lists all, first every 1000 entries.
+	GET /<internal_representation>
+	 - RETURNS. informations about a single entry.
+	POST /
+	 - creates.
+	 - needs friendly_name.
+	 - REQUIRED. internal representation of `country`, aside from friendly_name.
+	 - RETURNS. 200 with URL /<internal_representation>.
+	PUT /<internal_representation>
+	 - updates fno
+	 - REQUIRED. <internal_representation> and at least one of friendly_name,country_id_fk
+	DELETE /<internal_representation>
+	 - delete entry.
+			200 if no dependency/in use
+			409 if dependency. will require use of UI/dialog box to delete. To be implemented later.
+	 
+
+* seedmethod
+Planting method. Default/limited to usual suspects: Transplanted and direct-seeded.
+
+	seedmethod_id : character varying(20)
+	friendly_name : character varying(50)
+	desc: text
+
+	GET /
+	 - lists all
+	GET /<alpha-numeric-no-space>
+	 - returns information about the variety including crop type
+	GET /search/<alpha-numeric-including-space>
+	 - As with others.
+	 - Returns matching as if performing `GET /<..>` on each entry
+	POST /
+	 - creates
+	 - REQUIRED. friendly_name
+	 - OPTIONAL. desc.
+	PUT /<single-alpha-char>
+	 - updates.
+	 - REQUIRED. friendly_name
+	DELETE /<single-alpha-char>
+	 - deletes 
+			200 if no dependency/in use
+			409 if dependency. will require use of UI/dialog box to delete. To be implemented later.	
+
+* variety	
+Variety name.
+Assumption: We still don't consider the scenario where different names refer to a rice-crop. i.e., like IR-64 for 'PSC Rc-64'
+
+	variety_id : character varying(50)
+	crop_id_fk : character varying(50)
+	friendly_name : character varying(50)
+	desc: text
+	
+	GET /
+	 - lists all
+	GET /<alpha-numeric-no-space>
+	 - returns information about the variety including crop type
+	GET /search/<alpha-numeric-including-space>
+	 - As with others.
+	 - Returns matching as if performing `GET /<..>` on each entry
+	POST /
+	 - creates
+	 - REQUIRED. friendly_name and crop_id
+	 - OPTIONAL. desc.
+	PUT /<single-alpha-char>
+	 - updates
+	 - REQUIRED. friendly_name
+	DELETE /<single-alpha-char>
+	 - deletes 
+			200 if no dependency/in use
+			409 if dependency. will require use of UI/dialog box to delete. To be implemented later.	
+	
+* crop
+(Common) Plant name, like 'rice'.
+
+	crop_id : character varying(50)
+	friendly_name: character varying(50)
+	genus : character varying(50)
+	species :  character varying(50)	
+	desc: text
+	 
+	GET /
+	 - lists all
+	GET /<alpha-numeric-no-space>
+	 - returns information about the crop (i.e. common name(s), scientifc name), with
+	 <alpha-numeric-no-space> being the internal representation
+	GET /search/<alpha-numeric-including-space>
+	 - As with others.
+	 - Returns matching as if performing `GET /<..>` on each entry
+	POST /
+	 - creates 
+	 - REQUIRED. friendly_name.
+	 - OPTIONAL. desc.
+	PUT /<single-alpha-char>
+	 - updates
+	 - REQUIRED. friendly_name
+	DELETE /<single-alpha-char>
+	 - deletes 
+			200 if no dependency/in use
+			409 if dependency. will require use of UI/dialog box to delete. To be implemented later.
+	
+
+* soilprop
+Apparently, preparations in consideration to the stress conditions.
+
+  soilprop_id: character_varying(4)
+	friendly_name: character varying(20)
+	desc: text
+
+	GET /
+	 - lists all, first every 1000 entries.
+	GET /<4-digit-char>
+	 - <4-digit-char> is the internal representation of an entry. Returns itself, friendly_name and description	
+	GET /search/<alpha-numeric-including-space>
+	 - As with others.
+	 - Returns matching as if performing `GET /<..>` on each entry
+	POST /
+	 - creates 
+	 - REQUIRED. friendly_name.
+	 - OPTIONAL. desc.
+	PUT /<4-digit-char>
+	 - updates soilprop
+	 - REQUIRED. friendly_name.
+	 - Disclaimer - might need to delete and create if a radical change, i.e. from 'salt' to 'upld'
+	DELETE /<4-digit-char>
+	 - deletes
+			200 if no dependency/in use
+			409 if dependency. will require use of UI/dialog box to delete. To be implemented later.
+
