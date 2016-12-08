@@ -1,6 +1,6 @@
 Test Repository for Agri Data (TReAD)
-v0.0.3_revised-database-form-1
-Abraham Darius S. Llave | 2016-Dec-08 0229
+v0.1.0_alpha-release-unstable
+Abraham Darius S. Llave | 2016-Dec-08 1350
 
 Mini-documentation of RESTful API for access to database
 =========================================================
@@ -9,6 +9,8 @@ This document outlines the nouns we have identified from the given
 specifications, and the operations we deem to be important for the
 relevant manipulations. Also, the corresponding columns and data
 types in the database are identified and now defined accordingly.
+
+As of the above-release name, only a handful of APIs were made.
 
 ==========================================================
  

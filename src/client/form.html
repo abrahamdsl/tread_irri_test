@@ -1,0 +1,198 @@
+<!doctype html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:og="http://ogp.me/ns#"
+      xmlns:fb="https://www.facebook.com/2008/fbml">
+	<head>
+  	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta charset="utf-8">
+	  <meta name="viewport" content="width=device-width, initial-scale=1.0">   
+		<link href='https://fonts.googleapis.com/css?family=Open+Sans+Condensed:300' rel='stylesheet' type='text/css'>
+		<title>Enter survey data - Test Repository of Agricultural Data (TReAD)</title>
+		<!-- Latest compiled and minified CSS -->
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.min.css">
+		
+		<!-- jQuery library -->
+	  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+		  		
+		<!-- Latest compiled JavaScript -->
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>		
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+    	<script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.6.2/html5shiv.js"></script>
+    	<script src="//cdnjs.cloudflare.com/ajax/libs/respond.js/1.2.0/respond.js"></script>
+    <![endif]-->
+		    
+		<link rel="stylesheet" href="page.css" >
+		<link rel="stylesheet" href="form.css" >
+</head>
+<body>
+<nav class="navbar navbar-inverse">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>                        
+      </button>
+      <a class="navbar-brand" href="#">Test Repository of Agricultural Data (TReAD)</a>
+    </div>
+    <div class="collapse navbar-collapse" id="myNavbar">
+      <ul class="nav navbar-nav">
+        <li><a href="#">Home</a></li>
+				<li class="active"><a href="#">Data Entry</a></li>        
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li><a href="#"><span class="glyphicon glyphicon-user"></span> Sign Up</a></li>
+        <li><a href="#"><span class="glyphicon glyphicon-log-in"></span> Login</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+<div id="grand_container" style="">
+<div class="container-fluid">
+ <div class="row">
+		<div class="col-sm-12">
+		<ul class="breadcrumb">
+			<li><a href="#">Home</a></li>
+			<li><a href="#">Data Entry</a></li>			
+		</ul>
+		</div>
+	</div>
+  <div class="row">
+		<div class="col-sm-12">
+			<p class="explain top_guidelines">
+				Please accomplish the form. All fields are required unless stated in the placeholder.
+			</p>
+		</div>
+	</div>
+	<form id="mainf" action="http://128.199.65.100:8080/record" method="post" class="form-horizontal"> 
+			<div class="row">				
+				<div class="col-md-4 explain">
+					<h3>Basic info</h3>
+					<p>In here please input the basic information for a database entry.</p>					
+					<div class="form-group">
+						<label for="record_id">ID</label>
+						<input name="record_id" class="form-control" type="text" placeholder="Record number, if any (Optional)">
+					</div>
+					<div class="form-group">
+						<label for="year">Year</label>
+						<input name="year" class="form-control" type="number" min="1900" max="9999" required>                    
+					</div>
+					<div class="form-group">
+						<label for="fno">FNO</label>
+						<input name="fno" class="form-control" type="text" maxlength="1" required>
+					</div>
+					<div class="form-group">
+						<label for="fn">FN</label>
+						<input name="fn" class="form-control" type="text" required>
+					</div>
+					<div class="form-group">
+						<label for="season">Season</label>
+						<select name="season" class="form-control" required>
+							<option value="uns" selected="selected">Select season</option>
+							<option value="wet">Wet</option>
+							<option value="dry">Dry</option>							
+						 </select>
+					</div>
+					<div class="form-group">
+						<label for="var_name">Variety name</label>
+						<input name="var_name" class="form-control" type="text" required>
+					</div>
+				</div>
+				<div class="col-md-4 explain">
+					<h3>Location-centric bits</h3>
+					<p>In this column, please key-in details relating to the physical location of the site.</p>
+					<div class="form-group">
+						<label for="country">Country</label>
+						<select name="country" class="form-control" required>
+							<option selected="selected" value="">Choose country</option>
+							<option value="ID">Indonesia</option>
+							<option value="IN">India</option>
+							<option value="TH">Thailand</option>
+							<option value="VN">Vietnam</option>
+						</select>
+					</div>
+					<div class="form-group">
+						<label for="district">District</label>
+						<input name="district" class="form-control" type="text" placeholder="Unspecified">			 
+					</div>
+					<div class="form-group">
+						<label for="village">Village</label>
+						<input name="village" class="form-control" type="text" placeholder="Unspecified">
+					</div>
+					<div class="form-group">
+						<label for="latitude">Latitude</label>
+						<input name="latitude" class="form-control" type="numeric" required>
+					</div>
+					<div class="form-group">
+						<label for="longitude">Longitude</label>
+						<input name="longitude" class="form-control" type="numeric" required>
+					</div>
+					<div class="form-group">
+						<label for="soil_prop">Soil property</label>
+						<select name="soil_prop" class="form-control" required>
+							<option value="none" selected="selected">None</option>
+							<option value="salt">Salinity</option>
+							<option value="subm">Submergence</option>
+							<option value="drou">Drought</option>
+							<option value="upld">Upland</option>
+						 </select>
+					</div>
+				</div>				
+				<div class="col-md-4 explain">
+					<h3>Experimental params</h3>
+					<p>The fields here concerns circumstances surrounding immediate planting activity.</p>
+
+				  <div class="form-group">
+						 <label for="fa">FA</label>
+						 <input name="fa" class="form-control" type="numeric" required>
+				 </div>
+				 <div class="form-group">
+						<label for="ces">CES</label>
+						<select name="ces" class="form-control" required>
+							<option selected="selected" value="">Choose method</option>
+							<option value="direct">Direct-seeded</option>
+							<option value="transpl">Transplanted</option>							
+						</select>
+				 </div>
+				 <div class="form-group">
+						 <label for="seed_rate">Seed Rate</label>
+						 <input name="seed_rate" class="form-control" type="numeric" required>
+				 </div>
+				 <div class="form-group">
+						<label for="cen_date">CEN Date</label>
+						<input name="cen_date" class="form-control" type="date" required>
+					</div>
+					<div class="form-group">
+						<label for="ha_date">Harvest Date</label>
+						<input name="ha_date" class="form-control" type="date" required>
+					</div>					
+					<div class="form-group">
+						<label for="pre_crop">Previous crop</label>
+						<input name="pre_crop" class="form-control" type="text" required>
+					</div>
+					<div class="form-group">
+						<label for="fallow_period">Fallow period</label>
+						<input name="fallow_period" class="form-control" type="numeric" required>
+					</div>						
+					<div class="form-group">
+						<label for="yield">Yield</label>
+						<input name="yield" class="form-control" type="numeric" required>
+					</div>
+					<hr>
+					<div class="row">
+							<div class="col-md-6 col-sm-6 col-xs-6 col-lg-6">
+								<input id="reset" type="reset" class="btn btn-default" value="Reset Form" >
+							</div>
+							<div class="col-md-6 col-sm-6 col-xs-6 col-lg-6">
+								<button class="btn btn-default logbutton">Add Entry</button>
+							</div>          
+					</div>    
+				</div>
+			</div>
+     </form>
+	</div><!--container-fluid-->
+</div> <!--grand-container-->
+ </body>
+</html>	
